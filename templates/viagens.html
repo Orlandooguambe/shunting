@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Viagens Filtradas</title>
+</head>
+<body>
+    <h1>Viagens Filtradas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Funcionário</th>
+                <th>Data</th>
+                <th>Tipo de Carga</th>
+                <th>Toneladas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for viagem in viagens %}
+            <tr>
+                <td>{{ viagem[1] }}</td>
+                <td>{{ viagem[2] }}</td>
+                <td>{{ viagem[3] }}</td>
+                <td>{{ viagem[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('dashboard') }}">Voltar ao Dashboard</a>
+</body>
+</html>

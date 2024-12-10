@@ -1,0 +1,66 @@
+{% extends "index.html" %}
+{% block title %}Relatório de Combustível{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Relatório de Combustível</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active">Relatório de Combustível</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <form method="POST" action="{{ url_for('relatorio_combustivel') }}">
+        <div class="row mb-3">
+            <div class="col-sm-4">
+                <input type="month" class="form-control" id="mes" name="mes" value="{{ mes }}">
+            </div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+            <div class="col-sm-6 text-end">
+                <a href="{{ url_for('export_pdf_combustivel', mes=mes) }}" class="btn btn-danger">
+                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Dados do Relatório</h5>
+            <table class="table datatable" id="combustivelTable">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nome do Funcionário</th>
+                        <th>Registro do Caminhão</th>
+                        <th>Data</th>
+                        <th>Quantidade (Litros)</th>
+                        <th>Porto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in relatorio_combustivel %}
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataTable = new simpleDatatables.DataTable("#combustivelTable");
+    });
+</script>
+{% endblock %}

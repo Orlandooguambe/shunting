@@ -1,0 +1,108 @@
+{% extends "index.html" %}
+{% block title %}{% endblock %}
+
+{% block content %}
+<title>Escala</title>
+<main id="main" class="main">
+
+    <!-- Título da Tabela -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h3 class="text-center">Escala do dia {{ search_date }}</h3>
+        </div>
+    </div>
+
+    <!-- Formulário de Pesquisa e Botões -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="mb-2">
+                <label for="search_date" class="form-label">Pesquisar por data</label>
+            </div>
+            <form method="POST" action="{{ url_for('exibir_escala') }}">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="calendar-addon">
+                            <i class="bi bi-calendar3"></i>
+                        </span>
+                    </div>
+                    <input type="date" class="form-control" name="search_date" value="{{ search_date }}" aria-describedby="calendar-addon">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </div>
+            </form>
+            <a href="{{ url_for('gerar_escala_manual') }}" class="btn btn-warning">
+                <i class="bi bi-arrow-repeat"></i> Gerar Escala
+            </a>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('download_excel', date=search_date) }}" class="btn btn-success me-2">
+                    <i class="bi bi-file-earmark-excel"></i>  Excel
+                </a>
+                <a href="{{ url_for('download_pdf', date=search_date) }}" class="btn btn-danger">
+                    <i class="bi bi-file-earmark-pdf"></i>  PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="row flex-grow-1 mt-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="table-responsive table-wrapper">
+                        <table class="table datatable" id="escalaTable">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Turno</th>
+                                    <th>Porto</th>
+                                    <th>Flet</th>
+                                    <th>Matrícula</th>
+                                    <th>Funcionário</th>
+                                  
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for escala in escalas %}
+                                <tr>
+                                    <td>{{ escala[0] }}</td>
+                                    <td>{{ escala[1] }}</td>
+                                    <td>{{ escala[2] }}</td>
+                                    <td>{{ escala[3] }}</td>
+                                    <td>{{ escala[4] }}</td>
+                                    <td>{{ escala[5] }}</td>
+                                    
+                                </tr>
+                                <td>
+                                  
+                                </td>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+
+    <!-- Mensagem de Sucesso -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+</main><!-- End Main Section -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataTable = new simpleDatatables.DataTable(".datatable");
+    });
+</script>
+
+{% endblock %}

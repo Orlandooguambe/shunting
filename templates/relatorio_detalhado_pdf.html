@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Detalhado - PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório Detalhado</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Porto</th>
+                <th>Turno</th>
+                <th>Total de Toneladas</th>
+                <th>Total de Carvão</th>
+                <th>Total de Magnetite</th>
+                <th>Total de Prêmio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in relatorio_detalhado %}
+            <tr>
+                <td>{{ row.data }}</td>
+                <td>{{ row.porto }}</td>
+                <td>{{ row.turno }}</td>
+                <td>{{ row.total_toneladas }}</td>
+                <td>{{ row.total_carvao }}</td>
+                <td>{{ row.total_magnetite }}</td>
+                <td>{{ row.premio }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2>Total de Prêmio no Mês: R$ {{ total_premio }}</h2>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% extends "index.html" %}
+{% block title %}Adicionar Requisição de Combustível{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+    <h1>Adicionar Requisição de Combustível</h1>
+    <form action="{{ url_for('adicionar_requisicao_combustivel') }}" method="POST">
+        <div class="mb-3">
+            <label for="funcionario" class="form-label">Funcionário</label>
+            <select id="funcionario" name="funcionario_id" class="form-control" required>
+                {% for funcionario in funcionarios %}
+                <option value="{{ funcionario[0] }}">{{ funcionario[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="caminhao" class="form-label">Caminhão</label>
+            <select id="caminhao" name="caminhao_id" class="form-control" required>
+                {% for caminhao in caminhoes %}
+                <option value="{{ caminhao[0] }}">{{ caminhao[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="data" class="form-label">Data</label>
+            <input type="date" id="data" name="data" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="quantidade" class="form-label">Quantidade de Combustível (litros)</label>
+            <input type="number" id="quantidade" name="quantidade" class="form-control" placeholder="Quantidade de Combustível" required>
+        </div>
+        <div class="mb-3">
+            <label for="porto" class="form-label">Porto</label>
+            <input type="text" id="porto" name="porto" class="form-control" placeholder="Porto" required>
+        </div>
+        <button type="submit" class="btn btn-success">Registrar</button>
+    </form>
+</main>
+{% endblock %}

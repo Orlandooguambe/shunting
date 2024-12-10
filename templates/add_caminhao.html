@@ -1,0 +1,86 @@
+{% extends "index.html" %}
+{% block title %}{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Adicionar Caminhão</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('caminhoes') }}">Caminhões</a></li>
+                <li class="breadcrumb-item active">Adicionar Caminhão</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Formulário de Adição de Caminhão</h5>
+                        <!-- Mensagem de Sucesso -->
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ messages[0] }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+
+                        <!-- Horizontal Form -->
+                        <form method="POST" action="{{ url_for('add_caminhao', id=caminhao[0] if caminhao else None) }}">
+                            <div class="row mb-3">
+                                <label for="inputFlet" class="col-sm-2 col-form-label">Flet</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputFlet" name="flet" value="{{ caminhao[1] if caminhao else '' }}" required>
+                                </div>
+
+                                <label for="inputMatricula" class="col-sm-2 col-form-label">Matrícula</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputMatricula" name="matricula" value="{{ caminhao[2] if caminhao else '' }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label for="inputTrailer1" class="col-sm-2 col-form-label">Trailer 1</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputTrailer1" name="trailer1" value="{{ caminhao[3] if caminhao else '' }}" required>
+                                </div>
+
+                                <label for="inputTrailer2" class="col-sm-2 col-form-label">Trailer 2</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputTrailer2" name="trailer2" value="{{ caminhao[4] if caminhao else '' }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label">Disponibilidade</label>
+                                <div class="col-sm-10">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="gridCheckDisponibilidade" name="disponibilidade" {% if caminhao and caminhao[5] %}checked{% endif %}>
+                                        <label class="form-check-label" for="gridCheckDisponibilidade">
+                                            Disponível
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-6">
+                                    <button type="reset" class="btn btn-secondary">Reset</button>
+                                </div>
+                                <div class="col-sm-6 text-end">
+                                    <button type="submit" class="btn btn-primary">Salvar</button>
+                                </div>
+                            </div>
+                        </form><!-- End Horizontal Form -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main><!-- End Main Section -->
+{% endblock %}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Geral</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório Geral - {{ mes }}</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Funcionário</th>
+                <th>Total de Escalas</th>
+                <th>Turnos</th>
+                <th>Portos</th>
+                <th>Total de Toneladas</th>
+                <th>Total de Carvão</th>
+                <th>Total de Magnetite</th>
+                <th>Total de Prêmio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in relatorio_detalhado %}
+            <tr>
+                <td>{{ row[1] }}</td>  <!-- Nome do Funcionário -->
+                <td>{{ row[2] }}</td>  <!-- Total de Escalas -->
+                <td>{{ row[3] }}</td>  <!-- Turnos -->
+                <td>{{ row[4] }}</td>  <!-- Portos -->
+                <td>{{ row[5] }}</td>  <!-- Total de Toneladas -->
+                <td>{{ row[6] }}</td>  <!-- Total de Carvão -->
+                <td>{{ row[7] }}</td>  <!-- Total de Magnetite -->
+                <td>{{ row[8] }}</td>  <!-- Total de Prêmio -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

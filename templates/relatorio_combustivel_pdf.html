@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Combustível - PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Combustível</h1>
+    {% if mes %}
+    <p>Mês: {{ mes }}</p>
+    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>Nome do Funcionário</th>
+                <th>Registro do Caminhão</th>
+                <th>Data</th>
+                <th>Quantidade (Litros)</th>
+                <th>Porto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in relatorio_combustivel %}
+            <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

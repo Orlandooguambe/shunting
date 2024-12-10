@@ -1,0 +1,170 @@
+{% extends "index.html" %}
+{% block title %}{% endblock %}
+
+{% block content %}
+<title>Caminhões</title>
+<main id="main" class="main">
+    <!-- Cards -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="card info-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-truck" style="font-size: 2rem; color: blue;"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h5 class="card-title">Total de Caminhões</h5>
+                            <h6 style="font-size: 1.5rem; color: blue;">{{ caminhoes|length }}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- End Total de Caminhões Card -->
+
+        <div class="col-md-4">
+            <div class="card info-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-check-circle" style="font-size: 2rem; color: green;"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h5 class="card-title">Disponíveis</h5>
+                            <h6 style="font-size: 1.5rem; color: green;">{{ caminhoes|selectattr('5', 'eq', True)|list|length }}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- End Disponíveis Card -->
+
+        <div class="col-md-4">
+            <div class="card info-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-x-circle" style="font-size: 2rem; color: red;"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h5 class="card-title">Indisponíveis</h5>
+                            <h6 style="font-size: 1.5rem; color: red;">{{ caminhoes|selectattr('5', 'eq', False)|list|length }}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- End Indisponíveis Card -->
+    </div>
+
+    <!-- Formulário de Pesquisa -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="POST" action="{{ url_for('caminhoes') }}">
+            </form>
+        </div>
+        <div class="col-md-6" style="text-align: right;">
+            <button onclick="window.location.href='{{ url_for('add_caminhao') }}'" class="btn btn-primary btn-action mt-2">Adicionar Caminhão</button>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="row flex-grow-1">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="table-responsive table-wrapper">
+                        <table class="table datatable" id="truckTable">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 10%;">ID</th>
+                                    <th style="width: 10%;">Flet</th>
+                                    <th style="width: 10%;">Matrícula</th>
+                                    <th style="width: 10%;">Trailer 1</th>
+                                    <th style="width: 10%;">Trailer 2</th>
+                                    <th style="width: 10%;">Disponibilidade</th>
+                                    <th style="width: 10%;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="truckTable">
+                                {% for caminhao in caminhoes %}
+                                <tr>
+                                    <td>{{ caminhao[0] }}</td>
+                                    <td>{{ caminhao[1] }}</td>
+                                    <td>{{ caminhao[2] }}</td>
+                                    <td>{{ caminhao[3] }}</td>
+                                    <td>{{ caminhao[4] }}</td>
+                                    <td>
+                                        <form action="{{ url_for('toggle_disponibilidade_caminhao', id=caminhao[0]) }}" method="post" style="display:inline;" onsubmit="saveScrollPosition()">
+                                            <button type="submit" class="btn btn-sm {{ 'btn-success' if caminhao[5] else 'btn-danger' }}">
+                                                {{ 'Disponível' if caminhao[5] else 'Indisponível' }}
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-warning btn-sm btn-action" onclick="window.location.href='{{ url_for('add_caminhao', id=caminhao[0]) }}'">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm btn-action" onclick="confirmDelete({{ caminhao[0] }})">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td> 
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza de que deseja excluir este caminhão?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Sim</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+</main><!-- End Main Section -->
+
+<script>
+    var caminhaoIdToDelete = null;
+
+    function confirmDelete(id) {
+        caminhaoIdToDelete = id;
+        var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'), {});
+        deleteModal.show();
+    }
+
+    document.getElementById('confirmDelete').addEventListener('click', function () {
+        if (caminhaoIdToDelete) {
+            window.location.href = '/delete_caminhao/' + caminhaoIdToDelete;
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataTable = new simpleDatatables.DataTable(".datatable");
+    });
+</script>
+
+{% endblock %}

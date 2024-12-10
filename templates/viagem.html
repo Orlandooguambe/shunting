@@ -1,0 +1,41 @@
+{% extends "index.html" %}
+{% block title %}Registrar Viagem{% endblock %}
+{% block content %}
+<section class="content">
+    <div class="box">
+        <div class="box-body">
+            <h3>Registrar Viagem</h3>
+            <form action="{{ url_for('viagem') }}" method="post" class="form-horizontal">
+                <div class="form-group">
+                    <label for="funcionario_id">Funcionário</label>
+                    <select name="funcionario_id" class="form-control">
+                        {% for funcionario in funcionarios %}
+                        <option value="{{ funcionario[0] }}">{{ funcionario[1] }} {{ funcionario[2] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="data">Data</label>
+                    <input type="date" name="data" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="viagens">Número de Viagens</label>
+                    <input type="number" name="viagens" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="carga">Carga</label>
+                    <select name="carga" class="form-control">
+                        <option value="carvao">Carvão</option>
+                        <option value="granite">Granite</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="toneladas">Toneladas</label>
+                    <input type="number" name="toneladas" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

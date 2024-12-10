@@ -1,0 +1,73 @@
+{% extends "index.html" %}
+{% block title %}Relatório Geral{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Relatório Geral</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active">Relatório Geral</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    
+            <form method="POST" action="{{ url_for('relatorio_geral') }}">
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <input type="month" class="form-control" id="mes" name="mes" value="{{ mes }}">
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                    </div>
+                    <div class="col-sm-6 text-end">
+                        <a href="{{ url_for('export_pdf', mes=mes) }}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+                        <a href="{{ url_for('export_excel', mes=mes) }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+                    </div>
+                </div>
+            </form>
+    
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Dados do Relatório</h5>
+            <table class="table datatable" id="employeeTable">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Funcionário</th>
+                        <th>Total de Escalas</th>
+                        <th>Turnos</th>
+                        <th>Portos</th>
+                        <th>Total de Toneladas</th>
+                        <th>Total de Carvão</th>
+                        <th>Total de Magnetite</th>
+                        <th>Total de Prêmio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in relatorio_detalhado %}
+                    <tr>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                        <td>{{ row[5] }}</td>
+                        <td>{{ row[6] }}</td>
+                        <td>{{ row[7] }}</td>
+                        <td>{{ row[8] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataTable = new simpleDatatables.DataTable(".datatable");
+    });
+</script>
+{% endblock %}

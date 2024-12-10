@@ -1,0 +1,599 @@
+from flask import Flask, request, redirect, url_for, render_template, flash, session
+import sqlite3
+import datetime
+import random
+from apscheduler.schedulers.background import BackgroundScheduler
+import pdfkit
+import xlsxwriter
+from io import BytesIO
+from flask import send_file, make_response, request, render_template, redirect, url_for
+
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Função para conectar ao banco de dados
+def conectar_banco():
+    return sqlite3.connect("db/escalas.db")
+
+# Rota de login
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == "admin" and password == "admin":
+            session['logged_in'] = True
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Usuário ou senha incorretos')
+    return render_template('login.html')
+
+# Rota de dashboard
+@app.route('/dashboard')
+def dashboard():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('dashboard.html')
+
+# Rota de funcionários
+@app.route('/funcionarios', methods=['GET', 'POST'])
+def funcionarios():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    search_type = request.form.get('search_type')
+    search_query = request.form.get('search_query')
+    
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        if search_type and search_query:
+            if search_type == 'nome':
+                cursor.execute("SELECT * FROM funcionarios WHERE nome LIKE ?", ('%' + search_query + '%',))
+            elif search_type == 'numero':
+                cursor.execute("SELECT * FROM funcionarios WHERE numero LIKE ?", ('%' + search_query + '%',))
+        else:
+            cursor.execute("SELECT * FROM funcionarios")
+        funcionarios = cursor.fetchall()
+    
+    return render_template('funcionarios.html', funcionarios=funcionarios, search_type=search_type, search_query=search_query)
+
+# Rota para adicionar ou editar funcionário
+@app.route('/add_funcionario', methods=['GET', 'POST'])
+@app.route('/add_funcionario/<int:id>', methods=['GET', 'POST'])
+def add_funcionario(id=None):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        nome = request.form['nome']
+        cargo = request.form['cargo']
+        numero = request.form['numero']
+        disponibilidade = request.form.get('disponibilidade') == 'on'
+        
+        with conectar_banco() as conn:
+            cursor = conn.cursor()
+            if id:  # Editar funcionário existente
+                cursor.execute("""
+                    UPDATE funcionarios 
+                    SET nome=?, cargo=?, numero=?, disponibilidade=? 
+                    WHERE id=?
+                """, (nome, cargo, numero, disponibilidade, id))
+            else:  # Adicionar novo funcionário
+                cursor.execute("""
+                    INSERT INTO funcionarios (nome, cargo, numero, disponibilidade) 
+                    VALUES (?, ?, ?, ?)
+                """, (nome, cargo, numero, disponibilidade))
+            conn.commit()
+        
+        return redirect(url_for('funcionarios'))
+    else:
+        funcionario = None
+        if id:
+            with conectar_banco() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT id, nome, cargo, numero, disponibilidade 
+                    FROM funcionarios 
+                    WHERE id=?
+                """, (id,))
+                funcionario = cursor.fetchone()
+        
+        return render_template('add_funcionario.html', funcionario=funcionario)
+
+# Rota para excluir funcionário
+@app.route('/delete_funcionario/<int:id>', methods=['GET'])
+def delete_funcionario(id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM funcionarios WHERE id=?", (id,))
+        conn.commit()
+    return redirect(url_for('funcionarios'))
+
+# Rota para alterar a disponibilidade do funcionario
+@app.route('/toggle_disponibilidade_funcionario/<int:id>', methods=['POST'])
+def toggle_disponibilidade_funcionario(id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE funcionarios SET disponibilidade = NOT disponibilidade WHERE id = ?", (id,))
+        conn.commit()
+    return redirect(url_for('funcionarios'))
+
+
+# Rota de caminhões
+@app.route('/caminhoes', methods=['GET', 'POST'])
+def caminhoes():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    search_type = request.form.get('search_type')
+    search_query = request.form.get('search_query')
+    
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        if search_type and search_query:
+            if search_type == 'flet':
+                cursor.execute("SELECT * FROM caminhoes WHERE flet LIKE ?", ('%' + search_query + '%',))
+            elif search_type == 'matricula':
+                cursor.execute("SELECT * FROM caminhoes WHERE matricula LIKE ?", ('%' + search_query + '%',))
+            elif search_type == 'disponibilidade':
+                disponibilidade = 1 if search_query.lower() == 'disponível' else 0
+                cursor.execute("SELECT * FROM caminhoes WHERE disponibilidade = ?", (disponibilidade,))
+        else:
+            cursor.execute("SELECT * FROM caminhoes")
+        caminhoes = cursor.fetchall()
+    
+    return render_template('caminhoes.html', caminhoes=caminhoes, search_type=search_type, search_query=search_query)
+
+# Rota para alterar a disponibilidade do caminhão
+@app.route('/toggle_disponibilidade/<int:id>', methods=['POST'])
+def toggle_disponibilidade(id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE caminhoes SET disponibilidade = NOT disponibilidade WHERE id = ?", (id,))
+        conn.commit()
+    return redirect(url_for('caminhoes'))
+
+# Adicionar disponibilidade na rota de adicionar/editar caminhão
+@app.route('/add_caminhao', methods=['GET', 'POST'])
+@app.route('/add_caminhao/<int:id>', methods=['GET', 'POST'])
+def add_caminhao(id=None):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        flet = request.form['flet']
+        matricula = request.form['matricula']
+        trailer1 = request.form['trailer1']
+        trailer2 = request.form['trailer2']
+        disponibilidade = request.form.get('disponibilidade') == 'on'
+        with conectar_banco() as conn:
+            cursor = conn.cursor()
+            if id:  # Editar caminhão existente
+                cursor.execute("UPDATE caminhoes SET flet=?, matricula=?, trailer1=?, trailer2=?, disponibilidade=? WHERE id=?", 
+                               (flet, matricula, trailer1, trailer2, disponibilidade, id))
+            else:  # Adicionar novo caminhão
+                cursor.execute("INSERT INTO caminhoes (flet, matricula, trailer1, trailer2, disponibilidade) VALUES (?, ?, ?, ?, ?)", 
+                               (flet, matricula, trailer1, trailer2, disponibilidade))
+            conn.commit()
+        return redirect(url_for('caminhoes'))
+    else:
+        caminhao = None
+        if id:
+            with conectar_banco() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT id, flet, matricula, trailer1, trailer2, disponibilidade FROM caminhoes WHERE id=?", (id,))
+                caminhao = cursor.fetchone()
+        return render_template('add_caminhao.html', caminhao=caminhao)
+    
+   #escala  
+def reset_disponibilidade():
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE caminhoes SET disponibilidade = 1
+        """)
+        cursor.execute("""
+            UPDATE funcionarios SET disponibilidade = 1
+        """)
+        conn.commit()
+
+def atualizar_turnos_folgas():
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        # Resetar disponibilidade e atualizar turnos e folgas
+        cursor.execute("""
+            UPDATE funcionarios
+            SET
+                disponibilidade = CASE
+                    WHEN dias_folga >= 2 THEN 1
+                    ELSE 0
+                END,
+                turnos_manha = 0,
+                turnos_noite = 0,
+                dias_folga = CASE
+                    WHEN dias_folga >= 2 THEN 0
+                    ELSE dias_folga + 1
+                END
+        """)
+        conn.commit()
+
+
+# Rota de escala
+def gerar_escala():
+    data_atual = datetime.date.today()
+    portos = ['maputo', 'matola']
+    turnos = ['manha', 'noite']
+
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+
+        # Verificar se a escala já foi gerada para a data atual
+        cursor.execute("SELECT COUNT(*) FROM escalas WHERE data = ?", (data_atual,))
+        if cursor.fetchone()[0] > 0:
+            flash('A escala já foi gerada para hoje.')
+            return
+
+        reset_disponibilidade()
+
+        funcionarios_escalados = {}
+
+        for porto in portos:
+            for turno in turnos:
+                # Seleciona caminhões disponíveis aleatoriamente
+                cursor.execute("""
+                    SELECT id FROM caminhoes
+                    WHERE disponibilidade = 1
+                    ORDER BY RANDOM()
+                    LIMIT 20
+                """)
+                caminhoes_disponiveis = cursor.fetchall()
+
+                # Seleciona funcionários disponíveis aleatoriamente
+                cursor.execute("""
+                    SELECT id, turnos_manha, turnos_noite, dias_folga FROM funcionarios
+                    WHERE disponibilidade = 1
+                    ORDER BY RANDOM()
+                    LIMIT 20
+                """)
+                funcionarios_disponiveis = cursor.fetchall()
+
+                # Verificar se há caminhões e funcionários disponíveis suficientes
+                if len(caminhoes_disponiveis) == 0 or len(funcionarios_disponiveis) == 0:
+                    flash('Não há caminhões ou funcionários suficientes disponíveis para gerar a escala.')
+                    return
+
+                for i, caminhao in enumerate(caminhoes_disponiveis):
+                    if i < len(funcionarios_disponiveis):
+                        funcionario = funcionarios_disponiveis[i]
+                        funcionario_id = funcionario[0]
+
+                        # Atualizar turnos e folgas
+                        if turno == 'manha':
+                            cursor.execute("""
+                                UPDATE funcionarios
+                                SET turnos_manha = turnos_manha + 1, dias_folga = 0, disponibilidade = 0
+                                WHERE id = ?
+                            """, (funcionario_id,))
+                        elif turno == 'noite':
+                            cursor.execute("""
+                                UPDATE funcionarios
+                                SET turnos_noite = turnos_noite + 1, dias_folga = 0, disponibilidade = 0
+                                WHERE id = ?
+                            """, (funcionario_id,))
+
+                        funcionarios_escalados[funcionario_id] = turno
+                    else:
+                        funcionario_id = None
+
+                    # Inserir escala na tabela
+                    cursor.execute("""
+                        INSERT INTO escalas (data, turno, porto, caminhao_id, funcionario_id)
+                        VALUES (?, ?, ?, ?, ?)
+                    """, (data_atual, turno, porto, caminhao[0], funcionario_id))
+
+                    # Marcar caminhões utilizados como indisponíveis
+                    cursor.execute("""
+                        UPDATE caminhoes SET disponibilidade = 0 WHERE id = ?
+                    """, (caminhao[0],))
+
+        conn.commit()
+        flash('Escala gerada com sucesso!')
+
+# Rota de escala
+# Rota de escala
+# Rota para gerar escala manualmente
+@app.route('/gerar_escala_manual', methods=['GET', 'POST'])
+def gerar_escala_manual():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    gerar_escala()
+    return redirect(url_for('exibir_escala'))
+
+@app.route('/escala', methods=['GET', 'POST'])
+def exibir_escala():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    search_date = request.form.get('search_date', datetime.date.today().isoformat())
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT e.data, e.turno, e.porto, c.flet, c.matricula, f.nome, f.id
+            FROM escalas e
+            JOIN caminhoes c ON e.caminhao_id = c.id
+            JOIN funcionarios f ON e.funcionario_id = f.id
+            WHERE e.data = ?
+        """, (search_date,))
+        escalas = cursor.fetchall()
+
+        # Calcular prêmio para cada funcionário
+        premios = {}
+        for escala in escalas:
+            funcionario_id = escala[6]
+            cursor.execute("""
+                SELECT SUM(toneladas) FROM viagens
+                WHERE funcionario_id = ? AND strftime('%Y-%m', data) = strftime('%Y-%m', ?)
+            """, (funcionario_id, search_date))
+            total_toneladas = cursor.fetchone()[0] or 0
+            premio = total_toneladas * 6.25
+            premios[funcionario_id] = premio
+
+    return render_template('escala.html', escalas=escalas, premios=premios, search_date=search_date)
+
+
+# Configuração do agendador
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=gerar_escala, trigger="interval", days=1)
+scheduler.start()
+
+# Excell e PDF
+@app.route('/download_excel/<date>', methods=['GET'])
+def download_excel(date):
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT e.data, e.turno, e.porto, c.flet, c.matricula, f.nome
+            FROM escalas e
+            JOIN caminhoes c ON e.caminhao_id = c.id
+            JOIN funcionarios f ON e.funcionario_id = f.id
+            WHERE e.data = ?
+        """, (date,))
+        escalas = cursor.fetchall()
+
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet()
+
+    headers = ['Data', 'Turno', 'Porto', 'Flet', 'Matrícula', 'Funcionário']
+    for col_num, header in enumerate(headers):
+        worksheet.write(0, col_num, header)
+
+    for row_num, row_data in enumerate(escalas, 1):
+        for col_num, cell_data in enumerate(row_data):
+            worksheet.write(row_num, col_num, cell_data)
+
+    workbook.close()
+    output.seek(0)
+
+    return send_file(output, download_name=f'escala_{date}.xlsx', as_attachment=True)
+
+
+@app.route('/download_pdf/<date>', methods=['GET'])
+def download_pdf(date):
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT e.data, e.turno, e.porto, c.flet, c.matricula, f.nome
+            FROM escalas e
+            JOIN caminhoes c ON e.caminhao_id = c.id
+            JOIN funcionarios f ON e.funcionario_id = f.id
+            WHERE e.data = ?
+        """, (date,))
+        escalas = cursor.fetchall()
+
+    rendered = render_template('escala_pdf.html', escalas=escalas, search_date=date)
+    pdf = pdfkit.from_string(rendered, False)
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=escala_{date}.pdf'
+
+    return response
+
+
+# Outros códig
+#  Rota de Viagem
+@app.route('/registrar_viagem', methods=['POST'])
+def registrar_viagem():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    funcionario_id = request.form['funcionario_id']
+    data = request.form['data']
+    tipo_carga = request.form['tipo_carga']
+    toneladas = request.form['toneladas']
+
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO viagens (funcionario_id, data, tipo_carga, toneladas)
+            VALUES (?, ?, ?, ?)
+        """, (funcionario_id, data, tipo_carga, toneladas))
+        conn.commit()
+
+    return redirect(url_for('exibir_escala'))
+def calcular_premio(funcionario_id):
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT SUM(toneladas) FROM viagens
+            WHERE funcionario_id = ? AND strftime('%Y-%m', data) = strftime('%Y-%m', 'now')
+        """, (funcionario_id,))
+        total_toneladas = cursor.fetchone()[0] or 0
+    premio = total_toneladas * 6.25
+    return premio
+
+    
+
+# Rota de relatório
+
+# Rota para exibir o relatório
+# Rota para exibir o relatório
+@app.route('/relatorio', methods=['GET', 'POST'])
+def relatorio():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    # Obter a data para o relatório
+    search_date = request.form.get('search_date', datetime.date.today().isoformat())
+    
+    with conectar_banco() as conn:
+        cursor = conn.cursor()
+        
+        # Buscar todos os funcionários
+        cursor.execute("""
+            SELECT f.id, f.nome
+            FROM funcionarios f
+        """)
+        funcionarios = cursor.fetchall()
+        
+        relatorio_dados = []
+        
+        for funcionario in funcionarios:
+            funcionario_id, nome = funcionario
+            
+            # Buscar dados de turnos
+            cursor.execute("""
+                SELECT SUM(CASE WHEN turno = 'manha' THEN 1 ELSE 0 END) AS turnos_manha,
+                       SUM(CASE WHEN turno = 'noite' THEN 1 ELSE 0 END) AS turnos_noite
+                FROM escalas
+                WHERE funcionario_id = ? AND strftime('%Y-%m', data) = strftime('%Y-%m', ?)
+            """, (funcionario_id, search_date))
+            turnos = cursor.fetchone()
+            
+            # Buscar dados de portos
+            cursor.execute("""
+                SELECT SUM(CASE WHEN porto = 'maputo' THEN 1 ELSE 0 END) AS porto_maputo,
+                       SUM(CASE WHEN porto = 'matola' THEN 1 ELSE 0 END) AS porto_matola
+                FROM escalas
+                WHERE funcionario_id = ? AND strftime('%Y-%m', data) = strftime('%Y-%m', ?)
+            """, (funcionario_id, search_date))
+            portos = cursor.fetchone()
+            
+            # Buscar dados de toneladas de carvão e magnetite
+            cursor.execute("""
+                SELECT SUM(CASE WHEN tipo_carga = 'carvao' THEN toneladas ELSE 0 END) AS toneladas_carvao,
+                       SUM(CASE WHEN tipo_carga = 'magnetite' THEN toneladas ELSE 0 END) AS toneladas_magnetite
+                FROM viagens
+                WHERE funcionario_id = ? AND strftime('%Y-%m', data) = strftime('%Y-%m', ?)
+            """, (funcionario_id, search_date))
+            toneladas = cursor.fetchone()
+            
+            # Calcular prêmio
+            premio = calcular_premio(funcionario_id)
+            
+            # Adicionar dados ao relatório
+            relatorio_dados.append({
+                'nome': nome,
+                'turnos_manha': turnos[0] or 0,
+                'turnos_noite': turnos[1] or 0,
+                'porto_maputo': portos[0] or 0,
+                'porto_matola': portos[1] or 0,
+                'toneladas_carvao': toneladas[0] or 0,
+                'toneladas_magnetite': toneladas[1] or 0,
+                'premio': premio
+            })
+    
+    return render_template('relatorio.html', relatorio_dados=relatorio_dados, search_date=search_date)
+
+   
+
+# Rota de logout
+@app.route('/logout')
+def logout():
+    session['logged_in'] = False
+    return redirect(url_for('login'))
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+#tEMPLATE RELATORIO
+
+
+{% extends "layout.html" %}
+{% block title %}Relatório{% endblock %}
+{% block content %}
+<div class="container-fluid mt-5 content-wrapper">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="POST" action="{{ url_for('relatorio') }}">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><strong>Pesquisar por Data:</strong></span>
+                    </div>
+                    <input type="date" name="search_date" class="form-control" value="{{ search_date }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit"><i class="fas fa-search"></i> Pesquisar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6" style="text-align: right;">
+            <button onclick="window.location.href='{{ url_for('gerar_escala_manual') }}'" class="btn btn-primary btn-action mt-2">Gerar Escala</button>
+            <button onclick="window.location.href='{{ url_for('download_excel', date=search_date) }}'" class="btn btn-success btn-action mt-2">Download Excel</button>
+            <button onclick="window.location.href='{{ url_for('download_pdf', date=search_date) }}'" class="btn btn-danger btn-action mt-2">Download PDF</button>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12 text-center">
+            <h2>Relatório de Funcionários em <strong>{{ search_date }}</strong></h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover w-100">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Funcionário</th>
+                                    <th>Turnos Manhã</th>
+                                    <th>Turnos Noite</th>
+                                    <th>Porto Maputo</th>
+                                    <th>Porto Matola</th>
+                                    <th>Toneladas Carvão</th>
+                                    <th>Toneladas Magnetite</th>
+                                    <th>Prêmio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dado in relatorio_dados %}
+                                <tr>
+                                    <td>{{ dado.nome }}</td>
+                                    <td>{{ dado.turnos_manha }}</td>
+                                    <td>{{ dado.turnos_noite }}</td>
+                                    <td>{{ dado.porto_maputo }}</td>
+                                    <td>{{ dado.porto_matola }}</td>
+                                    <td>{{ dado.toneladas_carvao }}</td>
+                                    <td>{{ dado.toneladas_magnetite }}</td>
+                                    <td>{{ dado.premio }} MT</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+{% endblock %}

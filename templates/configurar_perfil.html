@@ -1,0 +1,40 @@
+{% extends "index.html" %}
+{% block title %}Configurar Perfil{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Configurar Perfil de Usuário</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active">Configurar Perfil</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <form method="POST" action="{{ url_for('configurar_perfil') }}">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="user_id" class="form-label">Selecionar Usuário</label>
+                <select id="user_id" name="user_id" class="form-control" required>
+                    {% for usuario in usuarios %}
+                    <option value="{{ usuario[0] }}">{{ usuario[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="perfil" class="form-label">Selecionar Perfil</label>
+                <select id="perfil" name="perfil" class="form-control" required>
+                    <option value="admin">Admin</option>
+                    <option value="gestor">Gestor</option>
+                    <option value="supervisor">Supervisor</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </form>
+</main>
+{% endblock %}

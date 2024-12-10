@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  {% block title %}{% endblock %}
+  
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="{{ url_for('static', filename='assets/img/favicon.png') }}" rel="icon">
+  <link href="{{ url_for('static', filename='assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/quill/quill.snow.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/quill/quill.bubble.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/simple-datatables/style.css') }}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: NiceAdmin
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Updated: Apr 20 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+  
+<body>
+
+    <!-- ======= Header ======= -->
+    <header id="header" class="header fixed-top d-flex align-items-center">
+  
+      <div class="d-flex align-items-center justify-content-between">
+        <a href="index.html" class="logo d-flex align-items-center">
+    
+          <span class="d-none d-lg-block">OG SOFTWARE Solutions</span>
+        </a>
+        <i class="bi bi-list toggle-sidebar-btn"></i>
+      </div><!-- End Logo -->
+  
+      
+  
+      <nav class="header-nav ms-auto">
+        <ul class="d-flex align-items-center">
+  
+          <li class="nav-item d-block d-lg-none">
+            <a class="nav-link nav-icon search-bar-toggle " href="#">
+              <i class="bi bi-search"></i>
+            </a>
+          </li><!-- End Search Icon-->
+  
+        
+          
+          <li class="nav-item dropdown pe-3">
+  
+            <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+              <img src="{{ url_for('static', filename='assets/img/profile-img.jpg') }}" alt="Profile" class="rounded-circle">
+              <span class="d-none d-md-block dropdown-toggle ps-2">Admin</span>
+            </a><!-- End Profile Icon -->
+  
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+              <li class="dropdown-header">
+                <h6>Orlando Guambe</h6>
+                <span>Full Stack Devolper</span>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+  
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="{{ url_for('perfil') }}">
+                  <i class="bi bi-person"></i>
+                  <span>My Profile</span>
+                </a>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+  
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="{{ url_for('perfil') }}">
+                  <i class="bi bi-gear"></i>
+                  <span>Account Settings</span>
+                </a>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+  
+  
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="{{ url_for('logout') }}">
+                  <i class="bi bi-box-arrow-right"></i>
+                  <span>Sign Out</span>
+                </a>
+              </li>
+  
+            </ul><!-- End Profile Dropdown Items -->
+      </nav><!-- End Header Nav -->
+  
+    </header><!-- End Header -->
+
+    <!-- ======= Sidebar ======= -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-logo">
+        <a href="index.html"> </a>
+        
+      </div><!-- End Sidebar Logo -->
+
+      <ul class="sidebar-nav">
+        <li class="nav-item">
+          <a href="{{ url_for('index') }}"class="nav-link collapsed">
+            <i class="bi bi-speedometer2 fs-4"></i>
+            <span class="link-text">Dashboard</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{{ url_for('funcionarios') }}" class="nav-link collapsed">
+            <i class="bi bi-people fs-4" ></i>
+            <span class="link-text">Funcionários</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{{ url_for('caminhoes') }}" class="nav-link collapsed">
+            <i class="bi bi-truck fs-4"></i>
+            <span class="link-text">Caminhões</span>
+          </a>
+        </li>
+        
+        <li class="nav-item">
+          <a class="nav-link collapsed" data-bs-target="#escala-nav" data-bs-toggle="collapse" href="#">
+              <i class="bi bi-calendar-check fs-4"></i><span>Escala</span><i class="bi bi-chevron-down ms-auto"></i>
+          </a>
+          <ul id="escala-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+              <li>
+                  <a href="{{ url_for('exibir_escala') }}">
+                      <i class="bi bi-eye fs-4"></i><span>Ver Escala</span>
+                  </a>
+              </li>
+              <li>
+                  <a href="{{ url_for('registrar_viagem') }}">
+                      <i class="bi bi-truck fs-4"></i><span>Registrar Viagem</span>
+                  </a>
+              </li>
+              <li>
+                  <a href="{{ url_for('gerenciar_combustivel') }}">
+                      <i class="bi bi-fuel-pump fs-4"></i><span>Requisitar Combustível</span>
+                  </a>
+              </li>
+          </ul>
+      </li>
+      
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#relatorios-nav" data-bs-toggle="collapse" href="#">
+            <i class="bi bi-file-earmark-text fs-4"></i><span>Relatórios</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="relatorios-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+            <li>
+                <a href="{{ url_for('relatorio_geral') }}">
+                    <i class="bi bi-eye fs-4"></i><span>Relatório Geral</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('relatorio_detalhado') }}">
+                    <i class="bi bi-person fs-4"></i><span>Extrato de Funcionário</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('relatorio_combustivel') }}">
+                    <i class="bi bi-fuel-pump fs-4"></i><span>Relatório de Combustível</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    
+          
+      
+      
+      <!-- New Definições section -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#definicoes-nav" data-bs-toggle="collapse" href="#">
+            <i class="bi bi-gear fs-4"></i><span>Definições</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="definicoes-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+            <li>
+                <a href="{{ url_for('perfil') }}">
+                    <i class="bi bi-person fs-4"></i><span>Perfil</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('adicionar_usuario') }}">
+                    <i class="bi bi-person-plus fs-4"></i><span>Adicionar Usuário</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('configurar_perfil') }}">
+                    <i class="bi bi-person-check fs-4"></i><span>Configurar Perfil</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+
+</ul>
+</aside><!-- End Sidebar -->
+
+    {% block content %}
+    <!-- ======= Main Section ======= -->
+  <main id="main" class="main">
+    
+    <div class="pagetitle">
+      <h1>Dashboard</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+    <!-- No seu arquivo index.html -->
+   
+    <section class="section dashboard">
+      <div class="row">
+
+<!-- Formulário de Filtro por Mês -->
+<form method="POST" action="{{ url_for('index') }}">
+  <div class="input-group mb-3">
+      <label class="input-group-text" for="selected_month">Filtrar por Mês</label>
+      <select class="form-select" id="selected_month" name="selected_month">
+          <option value="">Todos os Meses</option>
+          {% for mes in meses %}
+              <option value="{{ mes }}" {% if mes == selected_month %}selected{% endif %}>{{ mes }}</option>
+          {% endfor %}
+      </select>
+      <button class="btn btn-primary" type="submit">Filtrar</button>
+  </div>
+</form>
+
+
+<!-- Exibição dos Cards com os Dados -->
+<div class="row">
+  <!-- Total de Viagens Card -->
+  <div class="col-xxl-4 col-md-6">
+      <div class="card info-card sales-card">
+          <div class="card-body">
+              <h5 class="card-title">Total de Viagens</h5>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-truck"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h6>{{ num_viagens }}</h6>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div><!-- End Total de Viagens Card -->
+
+  <!-- Total de Funcionários Ativos Card -->
+  <div class="col-xxl-4 col-md-6">
+      <div class="card info-card revenue-card">
+          <div class="card-body">
+              <h5 class="card-title">Total de Funcionários Activos</h5>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-people"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h6>{{ num_funcionarios_ativos }}</h6>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div><!-- End Total de Funcionários Ativos Card -->
+
+  <!-- Total de Caminhões Disponíveis Card -->
+  <div class="col-xxl-4 col-md-6">
+      <div class="card info-card customers-card">
+          <div class="card-body">
+              <h5 class="card-title">Total de Caminhões Disponíveis</h5>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-truck-flatbed"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h6>{{ num_caminhoes_disponiveis }}</h6>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div><!-- End Total de Caminhões Disponíveis Card -->
+
+  <!-- Total de Toneladas Transportadas Card -->
+  <div class="col-xxl-4 col-md-6">
+      <div class="card info-card sales-card">
+          <div class="card-body">
+              <h5 class="card-title">Total de Toneladas Transportadas</h5>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-bar-chart"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h6>{{ total_toneladas }}</h6>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div><!-- End Total de Toneladas Transportadas Card -->
+
+  <!-- Receita Total Card -->
+  <div class="col-xxl-4 col-md-6">
+      <div class="card info-card revenue-card">
+          <div class="card-body">
+              <h5 class="card-title">Total Gasto de Custo</h5>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-currency-dollar"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h6>{{ receita_total }}</h6>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div><!-- End Receita Total Card -->
+</div><!-- End Row -->
+
+          </div>
+        </div><!-- End Left side columns -->
+
+        
+          <!-- Gráfico de linhas com Legenda -->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Gráfico de Linhas com Legenda e Cores</h5>
+              <div class="grafico">
+                <div>{{ grafico_linhas_legenda | safe }}</div>
+              </div>
+            </div>
+          </div><!-- End Gráfico de Barras com Legenda -->
+
+          <!-- Viagens por Mês -->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Viagens por Ano </h5>
+              <div class="grafico">
+                <div>{{grafico_barras | safe }}</div>
+              </div>
+            </div>
+          </div><!-- End Viagens por Mês -->
+
+          <!-- Distribuição de Tipos de Carga -->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Distribuição de Tipos de Carga</h5>
+              <div class="grafico">
+                {{ grafico_pizza | safe }}
+              </div>
+            </div>
+          </div><!-- End Distribuição de Tipos de Carga -->
+
+          <!-- Tendência de Toneladas Transportadas -->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Tendência de Toneladas Transportadas</h5>
+              <div class="grafico">
+                {{ grafico_linha | safe }}
+              </div>
+            </div>
+          </div><!-- End Tendência de Toneladas Transportadas -->
+
+        </div><!-- End Right side columns -->
+        {% block dashboard_content %}
+        {% endblock %}
+      </div>
+    </section>
+
+  </main><!-- End Main Section -->
+  {% endblock %}
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer" class="footer">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <div class="footer-logo">
+            </div><!-- End Footer Logo -->
+            <p>© 2024 Transportes Lalgy. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </div>
+    </footer><!-- End Footer -->
+a
+    <!-- Vendor JS Files -->
+    <script src="{{ url_for('static', filename='assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/vendor/php-email-form/validate.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/vendor/quill/quill.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+
+    <!-- Template Main JS File -->
+    <script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
+
+  </body>
+  </html>

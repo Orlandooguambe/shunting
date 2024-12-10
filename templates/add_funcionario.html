@@ -1,0 +1,106 @@
+{% extends "index.html" %}
+{% block title %}{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Adicionar Funcionário</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('funcionarios') }}">Funcionários</a></li>
+                <li class="breadcrumb-item active">Adicionar Funcionário</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Formulário de Adição de Funcionário</h5>
+                        <!-- Mensagem de Sucesso -->
+                       <!-- Mensagem de Sucesso -->
+                       {% with messages = get_flashed_messages() %}
+                       {% if messages %}
+                       <div class="alert alert-success alert-dismissible fade show" role="alert">
+                           {{ messages[0] }}
+                           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                       </div>
+                       {% endif %}
+                       {% endwith %}
+
+                        <!-- Horizontal Form -->
+                        <form method="POST" action="{{ url_for('add_funcionario', id=funcionario.id if funcionario else None) }}">
+                            <div class="row mb-3">
+                                <label for="inputNome" class="col-sm-2 col-form-label">Nome</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputNome" name="nome" value="{{ funcionario.nome if funcionario else '' }}" required>
+                                </div>
+
+                                <label for="inputApelido" class="col-sm-2 col-form-label">Apelido</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputApelido" name="apelido" value="{{ funcionario.apelido if funcionario else '' }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label for="inputCargo" class="col-sm-2 col-form-label">Cargo</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputCargo" name="cargo" value="{{ funcionario.cargo if funcionario else '' }}" required>
+                                </div>
+
+                                <label for="inputNumero" class="col-sm-2 col-form-label">Número de Funcionário</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputNumero" name="numero" value="{{ funcionario.numero if funcionario else '' }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label for="inputMorada" class="col-sm-2 col-form-label">Morada</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="inputMorada" name="morada" value="{{ funcionario.morada if funcionario else '' }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label for="inputBI" class="col-sm-2 col-form-label">BI</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputBI" name="bi" value="{{ funcionario.bi if funcionario else '' }}" required>
+                                </div>
+
+                                <label for="inputContato" class="col-sm-2 col-form-label">Número de Contato</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" id="inputContato" name="contato" value="{{ funcionario.contato if funcionario else '' }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label">Disponibilidade</label>
+                                <div class="col-sm-10">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="gridCheckDisponibilidade" name="disponibilidade" {% if funcionario and funcionario.disponibilidade %}checked{% endif %}>
+                                        <label class="form-check-label" for="gridCheckDisponibilidade">
+                                            Disponível
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-6">
+                                    <button type="reset" class="btn btn-secondary">Reset</button>
+                                </div>
+                                <div class="col-sm-6 text-end">
+                                    <button type="submit" class="btn btn-primary">Salvar</button>
+                                </div>
+                            </div>
+                        </form><!-- End Horizontal Form -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main><!-- End Main Section -->
+{% endblock %}

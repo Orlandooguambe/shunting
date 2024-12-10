@@ -1,0 +1,78 @@
+{% extends "index.html" %}
+{% block title %}{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Registrar Viagem para {{ search_date }}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('exibir_escala') }}">Ver escala</a> </li>
+                <li class="breadcrumb-item active">Registrar Viagem</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row flex-grow-1">
+            <div class="col-12">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="table-responsive table-wrapper">
+                            <form method="POST">
+                                <table class="table datatable" id="tripTable">
+                                    <thead class="thead-dark">
+                                        {% if mensagem_sucesso %}
+                                        <div class="alert alert-success mt-3">{{ mensagem_sucesso }}</div>
+                                        {% endif %}                  
+                                        <tr>
+                                            <th style="width: 15%;">Data</th>
+                                            <th style="width: 10%;">Turno</th>
+                                            <th style="width: 10%;">Porto</th>
+                                            <th style="width: 10%;">Caminhão</th>
+                                            <th style="width: 10%;">Funcionário</th>
+                                            <th style="width: 15%;">Tipo de Carga</th>
+                                            <th style="width: 10%;">Toneladas</th>
+                                            <th style="width: 10%;">Prêmio Atual</th>
+                                            <th style="width: 15%;">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tripTableBody">
+                                        {% for escala in escalas %}
+                                        <tr>
+                                            <td>{{ escala[0] }}</td>
+                                            <td>{{ escala[1] }}</td>
+                                            <td>{{ escala[2] }}</td>
+                                            <td>{{ escala[3] }} - {{ escala[4] }}</td>
+                                            <td>{{ escala[5] }}</td>
+                                            <td>
+                                                <select name="tipo_carga_{{ escala[6] }}">
+                                                    <option value="magnetite">Magnetite</option>
+                                                    <option value="carvao">Carvão</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" name="toneladas_{{ escala[6] }}" step="0.01"></td>
+                                            <td>{{ premios.get(escala[6], 0) }}</td>
+                                            <td>
+                                                <button type="submit" class="btn btn-sm btn-primary">Registrar</button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </form>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataTable = new simpleDatatables.DataTable(".datatable");
+    });
+</script>
+{% endblock %}

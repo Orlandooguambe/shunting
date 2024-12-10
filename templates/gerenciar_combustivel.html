@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+{% block title %}Gerenciar Combustível{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+    <h1>Gerenciar Combustível</h1>
+    <a href="{{ url_for('adicionar_requisicao_combustivel') }}" class="btn btn-primary mb-3">Adicionar Requisição</a>
+    <table class="table datatable" id="employeeTable">
+        <thead class="thead-dark">
+            <tr >
+                <th>ID</th>
+                <th>Funcionário</th>
+                <th>Caminhão</th>
+                <th>Data</th>
+                <th>Quantidade (litros)</th>
+                <th>Porto</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for requisicao in requisicoes %}
+            <tr>
+                <td>{{ requisicao[0] }}</td>
+                <td>{{ requisicao[1] }}</td>
+                <td>{{ requisicao[2] }}</td>
+                <td>{{ requisicao[3] }}</td>
+                <td>{{ requisicao[4] }}</td>
+                <td>{{ requisicao[5] }}</td>
+                <td>
+                    <a href="{{ url_for('download_requisicao_combustivel_pdf', id=requisicao[0]) }}"  class="btn btn-danger">
+                    <i class="bi bi-file-earmark-pdf"></i>PDF
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataTable = new simpleDatatables.DataTable(".datatable");
+    });
+</script>
+{% endblock %}

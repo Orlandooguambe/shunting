@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Requisição de Combustível</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .info {
+            margin-bottom: 20px;
+        }
+        .info label {
+            font-weight: bold;
+        }
+        .signature {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Requisição de Combustível</h1>
+        <div class="info">
+            <p><label>Funcionário:</label> {{ funcionario }}</p>
+            <p><label>Caminhão:</label> {{ caminhao }}</p>
+            <p><label>Data:</label> {{ data }}</p>
+            <p><label>Quantidade:</label> {{ quantidade }} litros</p>
+            <p><label>Porto:</label> {{ porto }}</p>
+        </div>
+        <div class="signature">
+            <p>____________________________________</p>
+            <p>Assinatura do Funcionário</p>
+            <p>____________________________________</p>
+            <p>Assinatura do Supervisor</p>
+        </div>
+    </div>
+</body>
+</html>
